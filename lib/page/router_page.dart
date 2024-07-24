@@ -5,6 +5,7 @@ import 'dashboard.dart';
 import 'home.dart';
 import 'tags.dart';
 import 'menu.dart';
+import 'login.dart';
 import '/widget/bottom_nav_bar.dart';
 
 class MainPage extends StatefulWidget {

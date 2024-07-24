@@ -15,38 +15,45 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-        title: Text('Select a Date'),
-        content:  Container(
-          height: 300,
-          child: Center(
-            child: SfDateRangePicker(
+          title: Text('Select a Date',textAlign: TextAlign.center,),
+          content: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+             children: [SfDateRangePicker(
               headerStyle: DateRangePickerHeaderStyle(
                 textAlign: TextAlign.center,
               ),
-              onCancel: (){ Navigator.pop(context);},
-              onSubmit: null,
-              showActionButtons: true,
-                onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
-                  if (args.value is DateTime) {
-                    setState(() {
-                      selectedDate = args.value as DateTime;
-                    });
-                  }
-                },
-                selectionMode: DateRangePickerSelectionMode.single,
-                initialSelectedDate: DateTime.now(),
+              monthCellStyle: const DateRangePickerMonthCellStyle(
+                textStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                ),
+                todayTextStyle: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                if (args.value is DateTime) {
+                  setState(() {
+                    selectedDate = args.value as DateTime;
+                  });
+                }
+              },
+              selectionMode: DateRangePickerSelectionMode.single,
+              initialSelectedDate: DateTime.now(),
+              showActionButtons: true,
+              onCancel: () {
+                Navigator.pop(context);
+              },
+              onSubmit: (Object? val) {
+                Navigator.pop(context);
+              },
+            ),
+             ],
           ),
-        ),
-        // actions: [
-        //   TextButton(
-        //     onPressed: () {
-        //       Navigator.pop(context); // ปิด dialog
-        //     },
-        //     child: Text('OK'),
-        //   ),
-        // ],
-                );
+        );
       },
     );
   }
