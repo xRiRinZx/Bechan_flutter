@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import 'package:intl/intl.dart'; // DateTime
+import 'package:intl/intl.dart'; // DateFormat
 
 class DatePickerWidget extends StatefulWidget {
   @override
@@ -8,83 +7,78 @@ class DatePickerWidget extends StatefulWidget {
 }
 
 class _DatePickerWidgetState extends State<DatePickerWidget> {
-  DateTime? selectedDate;
+  DateTime? startDate;
+  DateTime? endDate;
 
-  void _showDatePicker(BuildContext context) {
-    showDialog(
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTimeRange? result = await showDateRangePicker(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Select a Date',textAlign: TextAlign.center,),
-          content: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-             children: [SfDateRangePicker(
-              headerStyle: DateRangePickerHeaderStyle(
-                textAlign: TextAlign.center,
-              ),
-              monthCellStyle: const DateRangePickerMonthCellStyle(
-                textStyle: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w500,
-                ),
-                todayTextStyle: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
-                if (args.value is DateTime) {
-                  setState(() {
-                    selectedDate = args.value as DateTime;
-                  });
-                }
-              },
-              selectionMode: DateRangePickerSelectionMode.single,
-              initialSelectedDate: DateTime.now(),
-              showActionButtons: true,
-              onCancel: () {
-                Navigator.pop(context);
-              },
-              onSubmit: (Object? val) {
-                Navigator.pop(context);
-              },
-            ),
-             ],
-          ),
-        );
-      },
+      initialDateRange: DateTimeRange(
+        start: startDate ?? now,
+        end: endDate ?? now,
+      ),
+      firstDate: DateTime(now.year - 10), // Date range starts from 10 years ago
+      lastDate: DateTime(now.year + 10), // Date range goes up to 10 years ahead
     );
+
+    if (result != null) {
+      setState(() {
+        startDate = result.start;
+        endDate = result.end;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showDatePicker(context),
+      onTap: () => _selectDateRange(context),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2), // สีเงา
-              offset: Offset(0, 2), // ตำแหน่งเงา
+              offset: const Offset(0, 2), // ตำแหน่งเงา
               blurRadius: 4, // ระยะการเบลอของเงา
             ),
           ],
         ),
-        child: Center(
-          child: Text(
-            selectedDate != null
-                ? DateFormat('dd MMMM yyyy').format(selectedDate!)
-                : DateFormat('dd MMMM yyyy').format(DateTime.now()), // แสดงวันที่ปัจจุบันหากยังไม่เลือก
-            style: TextStyle(
+        height: 50,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+                    child: const Icon(
+                      Icons.calendar_today_rounded,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      size: 20,
+                    ),
+                  ),
+                  SizedBox(width: 10,),
+            Text(
+            startDate != null && endDate != null
+                ? (startDate!.isAtSameMomentAs(endDate!)
+                    ? DateFormat('dd MMMM yyyy').format(startDate!)
+                    : '${DateFormat('dd MMMM yyyy').format(startDate!)} - ${DateFormat('dd MMMM yyyy').format(endDate!)}')
+                : 'Select Date Range',
+            style: const TextStyle(
               fontSize: 16,
               color: Colors.black,
             ),
           ),
+          Container(
+                    child: const Icon(
+                      Icons.arrow_drop_down_rounded,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      size: 20,
+                    ),
+                  ),
+        ],
+          
         ),
       ),
     );

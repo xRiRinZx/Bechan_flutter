@@ -23,10 +23,17 @@ Future<bool> checkUserLoggedIn() async {
   );
 
   if (response.statusCode == 200) {
-    print('User successfully retrieved');
-    return true; // สามารถดึงข้อมูลผู้ใช้ได้
+    final responseData = json.decode(response.body);
+
+    if (responseData['status'] == 'ok') {
+      print('User successfully retrieved');
+      return true; // สามารถดึงข้อมูลผู้ใช้ได้และสถานะเป็น "ok"
+    } else {
+      print('Failed to retrieve user data: ${responseData['error']}');
+      return false; // การดึงข้อมูลผู้ใช้ล้มเหลวและสถานะเป็น "error"
+    }
   } else {
-    print('Failed to retrieve user data');
+    print('Failed to retrieve user data: ${response.statusCode}');
     return false; // การดึงข้อมูลผู้ใช้ล้มเหลว
   }
 }

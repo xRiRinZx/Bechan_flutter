@@ -58,7 +58,7 @@ class _SummaryWidgetState extends State<SummaryWidget> {
                     ),
                   ],
                 ),
-                height: 100,
+                height: 90,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -88,7 +88,7 @@ class _SummaryWidgetState extends State<SummaryWidget> {
                     ),
                   ],
                 ),
-                height: 100,
+                height: 90,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -118,7 +118,7 @@ class _SummaryWidgetState extends State<SummaryWidget> {
                     ),
                   ],
                 ),
-                height: 100,
+                height: 90,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
