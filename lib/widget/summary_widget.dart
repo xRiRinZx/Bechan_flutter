@@ -1,38 +1,41 @@
 import 'package:flutter/material.dart';
+import '../model_data/api_summaryday.dart'; 
 
 class SummaryWidget extends StatefulWidget {
+  final Summary? summary;
+
+  SummaryWidget({this.summary}); // Constructor to accept nullable summary
+
   @override
   _SummaryWidgetState createState() => _SummaryWidgetState();
 }
 
 class _SummaryWidgetState extends State<SummaryWidget> {
-  int container1Value = 0; // Income
-  int container2Value = 0; // Expense
-  late int container3Value; // Balance
+  double container1Value = 0; // Income
+  double container2Value = 0; // Expense
+  double container3Value = 0; // Balance
 
   @override
   void initState() {
     super.initState();
-    _updateBalance(); // คำนวณค่าเริ่มต้นของ Balance
+    _updateValues();
   }
 
-  void _updateBalance() {
+  @override
+  void didUpdateWidget(covariant SummaryWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.summary != widget.summary ) {
+      _updateValues(); // Update values when widget.summary changes
+    }
+  }
+
+  void _updateValues() {
     setState(() {
+      
+        container1Value = widget.summary!.totalIncome;
+        container2Value = widget.summary!.totalExpense;
+      
       container3Value = container1Value - container2Value;
-    });
-  }
-
-  void _updateIncome(int newValue) {
-    setState(() {
-      container1Value = newValue;
-      _updateBalance(); // อัพเดต Balance เมื่อ Income เปลี่ยน
-    });
-  }
-
-  void _updateExpense(int newValue) {
-    setState(() {
-      container2Value = newValue;
-      _updateBalance(); // อัพเดต Balance เมื่อ Expense เปลี่ยน
     });
   }
 
