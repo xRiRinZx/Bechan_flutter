@@ -6,8 +6,12 @@ import '../model_data/api_summaryday.dart';
 
 class TransactionList extends StatefulWidget {
   final List<Transaction> transactions;
+  final ScrollController scrollController; // เพิ่มพารามิเตอร์ใหม่
 
-  TransactionList({required this.transactions});
+  TransactionList({
+    required this.transactions,
+    required this.scrollController, // เพิ่มพารามิเตอร์ใหม่
+  });
 
   @override
   _TransactionListState createState() => _TransactionListState();
@@ -18,11 +22,12 @@ class _TransactionListState extends State<TransactionList> {
   Widget build(BuildContext context) {
     if (widget.transactions.isEmpty) {
       return Center(
-        child: Text('No transactions available.')
-        );
+        child: Text('No transactions available.'),
+      );
     }
 
     return ListView.builder(
+      controller: widget.scrollController, // ใช้ scrollController ที่ได้รับ
       padding: const EdgeInsets.all(10),
       itemCount: widget.transactions.length,
       itemBuilder: (context, index) {
@@ -107,12 +112,12 @@ class _TransactionListState extends State<TransactionList> {
                         padding: const EdgeInsets.all(10),
                         child: Icon(
                           Icons.circle_rounded,
-                          color: isIncome ? const Color.fromARGB(255, 144, 232, 147) : Color.fromARGB(255, 223, 133, 127),
-                          size: 20,
+                          color: isIncome ? Color.fromARGB(255, 96, 194, 148) : Color.fromARGB(255, 194, 96, 107),
+                          size: 17,
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.only(top: 10,bottom: 10),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,

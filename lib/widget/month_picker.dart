@@ -2,32 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-class DatePickerWidget extends StatefulWidget {
-  final Function(DateTime?, DateTime?)? onDateRangeSelected;
+class MonthPickerWidget extends StatefulWidget {
+  final Function(DateTime?)? onMonthSelected;
 
-  DatePickerWidget({this.onDateRangeSelected});
+  MonthPickerWidget({this.onMonthSelected, DateTime? selectedMonth});
 
   @override
-  _DatePickerWidgetState createState() => _DatePickerWidgetState();
+  _MonthPickerWidgetState createState() => _MonthPickerWidgetState();
 }
 
-class _DatePickerWidgetState extends State<DatePickerWidget> {
-  DateTime? startDate;
-  DateTime? endDate;
+class _MonthPickerWidgetState extends State<MonthPickerWidget> {
+  DateTime? selectedMonth;
 
-  void _selectDateRange(BuildContext context) {
+  void _selectMonth(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
           content: Container(
-            width: double.maxFinite, // Adjust the width as needed
-            height: 300, // Adjust the height as needed
+            width: double.maxFinite,
+            height: 300,
             child: SfDateRangePicker(
-              view: DateRangePickerView.month,
+              maxDate: DateTime.now(),
+              showNavigationArrow: true,
+              allowViewNavigation: false,
+              view: DateRangePickerView.year,
               backgroundColor: Colors.white,
-              selectionMode: DateRangePickerSelectionMode.range,
               headerStyle: const DateRangePickerHeaderStyle(
                 backgroundColor: Colors.white,
                 textAlign: TextAlign.center,
@@ -37,27 +38,23 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              initialSelectedRange: startDate != null && endDate != null
-                  ? PickerDateRange(startDate!, endDate!)
-                  : null,
-              maxDate: DateTime.now(),
-              minDate: DateTime(DateTime.now().year - 10),
               onCancel: () {
                 Navigator.of(context).pop();
               },
               showActionButtons: true,
               onSubmit: (value) {
-                if (value != null && value is PickerDateRange) {
+                if (value != null && value is DateTime) {
                   setState(() {
-                    startDate = value.startDate;
-                    endDate = value.endDate ?? value.startDate;
+                    selectedMonth = value;
                   });
-                  if (widget.onDateRangeSelected != null) {
-                    widget.onDateRangeSelected!(startDate, endDate);
+                  if (widget.onMonthSelected != null) {
+                    widget.onMonthSelected!(selectedMonth);
                   }
                 }
                 Navigator.of(context).pop();
               },
+              selectionMode: DateRangePickerSelectionMode.single,
+              initialSelectedDate: selectedMonth ?? DateTime.now(),
             ),
           ),
         );
@@ -68,9 +65,9 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
   @override
   Widget build(BuildContext context) {
     final DateTime now = DateTime.now();
-    
+
     return GestureDetector(
-      onTap: () => _selectDateRange(context),
+      onTap: () => _selectMonth(context),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
@@ -95,11 +92,9 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
             ),
             const SizedBox(width: 10),
             Text(
-              startDate != null && endDate != null
-                  ? (startDate!.isAtSameMomentAs(endDate!)
-                      ? DateFormat('dd MMM yyyy').format(startDate!)
-                      : '${DateFormat('dd MMM yyyy').format(startDate!)} - ${DateFormat('dd MMM yyyy').format(endDate!)}')
-                  : DateFormat('dd MMM yyyy').format(now), // Show current date if no range is selected
+              selectedMonth != null
+                  ? DateFormat('MMM yyyy').format(selectedMonth!)
+                  : DateFormat('MMM yyyy').format(now), // Show current month and year if no date is selected
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.black,

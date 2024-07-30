@@ -1,8 +1,5 @@
-import 'package:bechan/page/home.dart';
 import 'package:bechan/page/router_page.dart';
 import 'package:flutter/material.dart';
-import '/page/router_page.dart'; // นำเข้าคลาส MainPage
-import 'package:shared_preferences/shared_preferences.dart';
 import '/page/login.dart';
 import 'package:bechan/service/get_user.dart';
 

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '/widget/add_transaction.dart';
 import 'dashboard.dart';
 import 'home.dart';
 import 'tags.dart';
 import 'menu.dart';
-import 'login.dart';
 import '/widget/bottom_nav_bar.dart';
 
 class MainPage extends StatefulWidget {
