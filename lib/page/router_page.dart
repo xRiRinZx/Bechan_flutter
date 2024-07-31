@@ -45,7 +45,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
               begin: Offset(0.0, 1.0), // Start from below
               end: Offset.zero, // End at the center
             ).animate(animation),
-            child: AddItemPage(),
+            child: AddTransaction(),
           ),
         );
       },

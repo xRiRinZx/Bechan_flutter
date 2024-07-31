@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:bechan/page/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model_data/api_summaryday.dart';
+import '../service/no_user.dart';
 import '../widget/transaction_list.dart';
 import '/widget/date_picker.dart';
 import 'package:bechan/config.dart';
@@ -64,7 +64,7 @@ class _UserDataState extends State<Home> {
     final token = prefs.getString('token');
 
     if (token == null) {
-      _navigateToLogin();
+      navigateToLogin(context);
       return;
     }
 
@@ -88,13 +88,13 @@ class _UserDataState extends State<Home> {
             });
           }
         } else if (responseData['status'] == 'error') {
-          _navigateToLogin();
+          navigateToLogin(context);
         }
       } else {
-        _navigateToLogin();
+        navigateToLogin(context);
       }
     } catch (e) {
-      _navigateToLogin();
+      navigateToLogin(context);
     } finally {
       if (mounted) {
         setState(() {
@@ -102,13 +102,6 @@ class _UserDataState extends State<Home> {
         });
       }
     }
-  }
-
-  void _navigateToLogin() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => Login()),
-    );
   }
 
   Future<void> fetchTransactions({int page = 1}) async {
@@ -160,7 +153,7 @@ class _UserDataState extends State<Home> {
           }
         }
       } else {
-        _navigateToLogin();
+        navigateToLogin(context);
         if (mounted) {
           setState(() {
             isLoading = false;
@@ -168,7 +161,7 @@ class _UserDataState extends State<Home> {
         }
       }
     } catch (e) {
-      _navigateToLogin();
+      navigateToLogin(context);
       if (mounted) {
         setState(() {
           isLoading = false;

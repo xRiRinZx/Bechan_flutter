@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:bechan/config.dart';
-import 'package:bechan/page/login.dart';
-import 'package:bechan/widget/month_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -10,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model_data/api_summarymonth.dart';
+import '../service/no_user.dart';
 import '../widget/summaryMonth_widget.dart';
 import '../widget/year_picker.dart';
 
@@ -38,7 +37,7 @@ class _SummaryYearState extends State<SummaryYear> {
     final token = prefs.getString('token');
 
     if (token == null) {
-      _navigateToLogin();
+      navigateToLogin(context);
       return;
     }
 
@@ -62,13 +61,13 @@ class _SummaryYearState extends State<SummaryYear> {
           });
         }
       } else if (responseData['status'] == 'error') {
-        _navigateToLogin();
+        navigateToLogin(context);
       }
     } else {
-      _navigateToLogin();
+      navigateToLogin(context);
     }
   } catch (e) {
-    _navigateToLogin();
+    navigateToLogin(context);
   } finally {
     if (mounted) {
       setState(() {
@@ -77,12 +76,6 @@ class _SummaryYearState extends State<SummaryYear> {
     }
   }
 }
-  void _navigateToLogin() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => Login()),
-    );
-  }
 
   Future<void> fetchTransactions() async {
     if (selectedYear == null) return;
@@ -97,7 +90,7 @@ class _SummaryYearState extends State<SummaryYear> {
     final token = prefs.getString('token');
 
     if (token == null) {
-      _navigateToLogin();
+      navigateToLogin(context);
       return;
     }
 
@@ -134,10 +127,10 @@ class _SummaryYearState extends State<SummaryYear> {
       }
     }
     } else {
-      _navigateToLogin();
+      navigateToLogin(context);
     }
   } catch (e) {
-    _navigateToLogin();
+    navigateToLogin(context);
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -145,7 +138,6 @@ class _SummaryYearState extends State<SummaryYear> {
     }
   } 
 }
-
 
   void onYearSelected(DateTime? newYear) {
     setState(() {

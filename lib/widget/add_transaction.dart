@@ -1,38 +1,53 @@
+import 'package:bechan/page/summary_month.dart';
+import 'package:bechan/page/summary_year.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class AddItemPage extends StatelessWidget {
+import '../page/add_expense.dart';
+import '../page/add_income.dart';
+
+class AddTransaction extends StatefulWidget {
+  @override
+  _AddTransactionState createState() => _AddTransactionState();
+}
+
+class _AddTransactionState extends State<AddTransaction> {
+  int _selectedSegment = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Transaction'),
+        title: Text('AddTransaction'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              'Add Transaction',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Add Transaction',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the page with animation
+      body: Column(
+        children: [
+          Container(
+            child: CupertinoSlidingSegmentedControl<int>(
+              children: {
+                0: Text('Income'),
+                1: Text('Expense'),
               },
-              child: Text('Add Transaction'),
+              groupValue: _selectedSegment,
+              onValueChanged: (int? newValue) {
+                setState(() {
+                  if (newValue != null) {
+                    _selectedSegment = newValue;
+                  }
+                });
+              },
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: IndexedStack(
+              index: _selectedSegment,
+              children: [
+                AddIncome(),
+                AddExpense(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
