@@ -3,9 +3,11 @@ import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
 import '../service/no_user.dart';
+import '../widget/date_picker_addpage.dart';
 
 class AddIncome extends StatefulWidget {
   @override
@@ -18,13 +20,16 @@ class _AddIncomeState extends State<AddIncome> {
   final TextEditingController _nameController = TextEditingController();
 
   List<dynamic> _categories = [];
+  Map<String, dynamic> _categoryMap = {};
   String _selectedCategory = '';
   int _selectedCategoryIndex = 0;
   List<dynamic> _tags = [];
+  Map<String, dynamic> _tagMap = {};
   List<String> _selectedTags = [];
-  bool isLoading = true; // เริ่มต้นด้วยสถานะการโหลด
-  bool _isFavorite = false; // ตัวแปรเก็บสถานะ favorite
-  List<dynamic> _favoriteTransactions = [];
+  bool isLoading = true;
+  bool _isFavorite = false;
+  String _selectedDate = '';
+  DateTime? selectDate;
 
   @override
   void dispose() {
@@ -37,6 +42,8 @@ class _AddIncomeState extends State<AddIncome> {
   @override
   void initState() {
     super.initState();
+    DateTime now = DateTime.now();
+    selectDate = now;
     _fetchCategories();
     _fetchTags();
   }
@@ -59,6 +66,7 @@ class _AddIncomeState extends State<AddIncome> {
           if (mounted) {
             setState(() {
               _categories = data['data']['income'];
+              _categoryMap = {for (var category in _categories) category['name']: category['categorie_id']};
               _selectedCategory = _categories.isNotEmpty ? _categories[0]['name'] : '';
             });
           }
@@ -93,8 +101,9 @@ class _AddIncomeState extends State<AddIncome> {
         if (data['status'] == 'ok') {
           if (mounted) {
             setState(() {
-              _tags = data['data']['summaryTags']; // Adjust according to your API response structure
-              isLoading = false; // ตั้งค่าสถานะเป็น false เมื่อโหลดข้อมูลเสร็จ
+              _tags = data['data']['summaryTags'];
+              _tagMap = {for (var tag in _tags) tag['tag_name']: tag['tag_id']};
+              isLoading = false;
             });
           }
         } else {
@@ -110,41 +119,6 @@ class _AddIncomeState extends State<AddIncome> {
       throw Exception('Failed to load tags');
     }
   }
-
-  // Future<void> _fetchFavoriteTransactions() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final token = prefs.getString('token');
-
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse('${Config.apiUrl}/getFavorite?fav=1'),
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': 'Bearer $token',
-  //       },
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final data = json.decode(response.body);
-  //       if (data['status'] == 'ok') {
-  //         if (mounted) {
-  //           setState(() {
-  //             _favoriteTransactions = data['data']['favorite']; // Adjust according to your API response structure
-  //           });
-  //           _showFavoriteTransactionPicker();
-  //         }
-  //       } else {
-  //         navigateToLogin(context);
-  //         throw Exception('Failed to load favorite transactions');
-  //       }
-  //     } else {
-  //       navigateToLogin(context);
-  //       throw Exception('Failed to load favorite transactions');
-  //     }
-  //   } catch (e) {
-  //     navigateToLogin(context);
-  //     throw Exception('Failed to load favorite transactions');
-  //   }
-  // }
 
   void _showCategoryPicker() {
     showModalBottomSheet(
@@ -172,50 +146,15 @@ class _AddIncomeState extends State<AddIncome> {
 
   void _toggleFavorite() {
     setState(() {
-      _isFavorite = !_isFavorite; // สลับค่า _isFavorite
+      _isFavorite = !_isFavorite;
     });
   }
 
-  // void _toggleFavorite() {
-  //   if (!_isFavorite) {
-  //     _fetchFavoriteTransactions();
-  //   } else {
-  //     setState(() {
-  //       _isFavorite = false;
-  //     });
-  //   }
-  // }
-
-  // void _showFavoriteTransactionPicker() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         height: 300,
-  //         child: ListView.builder(
-  //           itemCount: _favoriteTransactions.length,
-  //           itemBuilder: (context, index) {
-  //             final transaction = _favoriteTransactions[index];
-  //             return ListTile(
-  //               title: Text(transaction['name']),
-  //               onTap: () {
-  //                 setState(() {
-  //                   _nameController.text = transaction['name'];
-  //                   _amountController.text = transaction['amount'].toString();
-  //                   _noteController.text = transaction['note'];
-  //                   _selectedCategory = transaction['category'] ?? _selectedCategory;
-  //                   _selectedTags = List<String>.from(transaction['tags'] ?? []);
-  //                   _isFavorite = true;
-  //                 });
-  //                 Navigator.of(context).pop();
-  //               },
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  void onDateSelected(DateTime? date) {
+    setState(() {
+      selectDate = date;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -242,29 +181,7 @@ class _AddIncomeState extends State<AddIncome> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.calendar_today_rounded,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          size: 20,
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          'Select Date',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down_rounded,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          size: 20,
-                        ),
-                      ],
-                    ),
+                    DatePickerAddWidget(onDateSelected: onDateSelected),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: TextField(
@@ -394,22 +311,17 @@ class _AddIncomeState extends State<AddIncome> {
                                         _selectedTags = val;
                                       });
                                     },
-                                    choiceItems: C2Choice.listFrom<String, dynamic>(
-                                      source: _tags,
-                                      value: (i, v) => v['tag_name'],
-                                      label: (i, v) => v['tag_name'],
+                                    choiceItems: C2Choice.listFrom<String, String>(
+                                      source: _tags.map<String>((tag) => tag['tag_name'].toString()).toList(),
+                                      value: (i, v) => v,
+                                      label: (i, v) => v,
                                     ),
-                                    wrapped: false, // Set wrapped to false for horizontal scrolling
+                                    wrapped: false, 
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                    if (!isLoading)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10,right: 10),
-                        child: Text('Selected Tags: ${_selectedTags.join(', ')}'),
-                      ),
                   ],
                 ),
               ),
@@ -449,55 +361,95 @@ class _AddIncomeState extends State<AddIncome> {
               ),
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text('Submit'),
-                ),
-              ),
-            ),
+          const SizedBox(height: 30),
+        Expanded(
+  child: Padding(
+    padding: const EdgeInsets.all(10),
+    child: Container(
+      alignment: Alignment.bottomCenter,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      child: SizedBox(
+        width: double.infinity, // ปรับความกว้างของปุ่มให้เต็ม
+        child: ElevatedButton(
+          onPressed: _saveIncome,
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            backgroundColor: Color.fromARGB(255, 96, 194, 148),
           ),
+          child: Text(
+            '+',
+            style: TextStyle(fontSize: 30, color: Colors.white),
+          ),
+        ),
+      ),
+    ),
+  ),
+),
+
         ],
       ),
     );
   }
 
-  void _submitForm() {
-    final String amount = _amountController.text;
-    final String note = _noteController.text;
-    final String name = _nameController.text;
+  // Future<void> _saveIncome() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final token = prefs.getString('token');
 
-    if (amount.isEmpty || note.isEmpty || name.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('Please fill in all fields'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
-          ],
-        ),
+  //   final incomeData = {
+  //     'categorie_id': _categoryMap[_selectedCategory],
+  //     'amount': _amountController.text,
+  //     'note': _nameController.text,
+  //     'detail': _noteController.text,
+  //     'transaction_datetime': selectDate,
+  //     'fav': _isFavorite ? 1 : 0,
+  //     'tag_id': _selectedTags.map((tag) => _tagMap[tag]).toList(),
+  //   };
+
+  //   print(incomeData);
+  // }
+
+  Future<void> _saveIncome() async {
+    final DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+    final formattedDate = selectDate != null ? dateFormat.format(selectDate!) : '';
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    try {
+      final response = await http.post(
+        Uri.parse('${Config.apiUrl}/record'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'categorie_id': _categoryMap[_selectedCategory],
+              'amount': _amountController.text,
+              'note': _nameController.text,
+              'detail': _noteController.text,
+              'transaction_datetime': formattedDate,
+              'fav': _isFavorite ? 1 : 0,
+              'tag_id': _selectedTags.map((tag) => _tagMap[tag]).toList(),
+        }),
       );
-      return;
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'ok') {
+          Navigator.pop(context);
+        } else if (data['status'] == 'error') {
+           ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save income: ${data['message']}')),
+        );
+        }
+      } else {
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save income: Server error')),
+      );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
     }
-
-    final Map<String, dynamic> formData = {
-      'categorie_id': _selectedCategory,
-      'amount': amount,
-      'note': name,
-      'detail': note,
-      'tag_id': _selectedTags,
-      'favorite': _isFavorite ? 1 : 0, // เพิ่มค่านี้เพื่อส่งไปยัง backend
-    };
-
-    // Submit formData to the backend
-    print(formData);
   }
 }
