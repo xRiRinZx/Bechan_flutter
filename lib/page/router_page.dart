@@ -27,6 +27,10 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
+  void _updateHomeData() {
+    Home.fetchTransactions(context);
+  }
+
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
@@ -34,27 +38,26 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     });
   }
 
-  void _navigateToAddItemPage(BuildContext context) {
-  Navigator.of(context).push(
-    PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(0.0, 1.0), // Start from below
-              end: Offset.zero, // End at the center
-            ).animate(animation),
-            child: AddTransaction(),
-          ),
-        );
-      },
-      transitionDuration: Duration(milliseconds: 500), // Duration of the animation
-    ),
-  );
-}
+  void _navigateToAddItemPage(BuildContext context) async {
+    await Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => AddTransaction(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.ease;
 
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+      ),
+    );
+    _updateHomeData();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -13,6 +13,11 @@ import '/widget/summary_widget.dart';
 class Home extends StatefulWidget {
   const Home({super.key});
 
+  static void fetchTransactions(BuildContext context, {int page = 1}) {
+    final _UserDataState? homeState = context.findAncestorStateOfType<_UserDataState>();
+    homeState?.fetchTransactions(page: page);
+  }
+
   @override
   State<StatefulWidget> createState() {
     return _UserDataState();
@@ -60,49 +65,57 @@ class _UserDataState extends State<Home> {
   }
 
   Future<void> _fetchUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
 
-    if (token == null) {
-      navigateToLogin(context);
-      return;
-    }
+  if (token == null) {
+    navigateToLogin(context);
+    return;
+  }
 
-    try {
-      final response = await http.get(
-        Uri.parse('${Config.apiUrl}/user'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+  try {
+    final response = await http.get(
+      Uri.parse('${Config.apiUrl}/user'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('Current Token: $token');
 
-        if (responseData['status'] == 'ok') {
-          if (mounted) {
-            setState(() {
-              _userData = responseData;
-              isLoading = false;
-            });
-          }
-        } else if (responseData['status'] == 'error') {
-          navigateToLogin(context);
+      if (responseData['status'] == 'ok') {
+        // Update the token in SharedPreferences if there is a new one
+        final newToken = responseData['data']['token'];
+        if (newToken != null && newToken != token) {
+          await prefs.setString('token', newToken);
         }
-      } else {
+
+        if (mounted) {
+          setState(() {
+            _userData = responseData;
+            isLoading = false;
+          });
+        }
+      } else if (responseData['status'] == 'error') {
         navigateToLogin(context);
       }
-    } catch (e) {
+    } else {
       navigateToLogin(context);
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+    }
+  } catch (e) {
+    navigateToLogin(context);
+  } finally {
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
+}
+
 
   Future<void> fetchTransactions({int page = 1}) async {
     if (startDate == null || endDate == null) return;
@@ -176,6 +189,7 @@ class _UserDataState extends State<Home> {
       endDate = end;
       currentPage = 1;
       fetchTransactions(page: currentPage);
+      _fetchUserData();
     });
   }
 

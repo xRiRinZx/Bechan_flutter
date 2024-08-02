@@ -28,7 +28,6 @@ class _AddExpenseState extends State<AddExpense> {
   List<String> _selectedTags = [];
   bool isLoading = true;
   bool _isFavorite = false;
-  String _selectedDate = '';
   DateTime? selectDate;
 
   @override

@@ -28,7 +28,6 @@ class _AddIncomeState extends State<AddIncome> {
   List<String> _selectedTags = [];
   bool isLoading = true;
   bool _isFavorite = false;
-  String _selectedDate = '';
   DateTime? selectDate;
 
   @override
@@ -435,7 +434,7 @@ class _AddIncomeState extends State<AddIncome> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'ok') {
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         } else if (data['status'] == 'error') {
            ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to save income: ${data['message']}')),
